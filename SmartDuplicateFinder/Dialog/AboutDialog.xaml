@@ -4,13 +4,16 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:smartDuplicateFinder="clr-namespace:SmartDuplicateFinder"
+        xmlns:dialog="clr-namespace:SmartDuplicateFinder.Dialog"
         mc:Ignorable="d"
         Title="About Smart Duplicate Finder"
         Height="392.509"
         Width="572"
         WindowStartupLocation="CenterOwner"
         ResizeMode="NoResize"
-        Background="#FFF0F0F0">
+        Background="#FFF0F0F0"
+        d:DataContext="{d:DesignInstance Type=dialog:AboutDialog, IsDesignTimeCreatable=True}" 
+        >
     <Border Margin="15"
             Background="white"
             BorderBrush="#FF828790"
