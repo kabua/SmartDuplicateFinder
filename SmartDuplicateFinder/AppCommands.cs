@@ -12,4 +12,6 @@ public static class AppCommands
     public static readonly RoutedUICommand Okay = new("Ok", "Ok", OwnerType);
     public static readonly RoutedUICommand Cancel = new("Cancel", "Cancel", OwnerType);
     public static readonly RoutedUICommand Close = new("Close", "Close", OwnerType);
+
+    public static readonly RoutedUICommand AboutHelp = new ("About...", "AboutHelp", OwnerType);
 }

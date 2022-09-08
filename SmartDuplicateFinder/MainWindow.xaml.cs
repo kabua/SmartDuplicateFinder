@@ -1,4 +1,5 @@
-﻿using System;
+﻿using SmartDuplicateFinder.Dialog;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -29,6 +30,16 @@ namespace SmartDuplicateFinder
             DataContext = this;
         }
 
+        private void ShowAbout()
+        {
+			var dialog = new AboutDialog
+			{
+				Owner = this
+			};
+
+			dialog.ShowDialog();
+		}
+
         private void AddCommandBindings()
         {
             //
@@ -41,7 +52,7 @@ namespace SmartDuplicateFinder
             // Help Menu
             //
 
-            //CommandBindings.Add(new CommandBinding(AppCommands.AboutHelp, (sender, args) => ShowAbout()));
+            CommandBindings.Add(new CommandBinding(AppCommands.AboutHelp, (sender, args) => ShowAbout()));
         }
     }
 }
