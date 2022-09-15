@@ -1,4 +1,6 @@
-﻿using SmartDuplicateFinder.Dialog;
+﻿using Ninject;
+using SmartDuplicateFinder.Dialog;
+using SmartDuplicateFinder.Views;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -26,8 +28,20 @@ namespace SmartDuplicateFinder
             InitializeComponent();
             AddCommandBindings();
 
+            var view = App.Current.Container.Get<FindDuplicatesView>();
+            SetView(view);
+
             Title = App.Name;
             DataContext = this;
+        }
+
+        public bool IsBusy { get; set; }
+
+        public Control CurrentView { get; private set; }
+
+        private void SetView(Control view)
+        {
+	        CurrentView = view;
         }
 
         private void ShowAbout()

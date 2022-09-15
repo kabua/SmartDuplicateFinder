@@ -4,17 +4,41 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:SmartDuplicateFinder"
+        xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
         mc:Ignorable="d"
         Title="!Smart Duplicate Finder!" 
         Height="450" 
-        Width="800">
-    <Menu>
-        <MenuItem Header="_File">
-            <MenuItem Command="{x:Static local:AppCommands.Exit}" />
-        </MenuItem>
+        Width="800"
+        d:DataContext="{d:DesignInstance Type=local:MainWindow, IsDesignTimeCreatable=True}" 
+        >
+    <DockPanel>
+        <Menu DockPanel.Dock="Top">
+            <MenuItem Header="_File">
+                <MenuItem Command="{x:Static local:AppCommands.Exit}" />
+            </MenuItem>
 
-        <MenuItem Header="_Help">
-            <MenuItem Command="{x:Static local:AppCommands.AboutHelp}" />
-        </MenuItem>
-    </Menu>
+            <MenuItem Header="_Help">
+                <MenuItem Command="{x:Static local:AppCommands.AboutHelp}" />
+            </MenuItem>
+        </Menu>
+
+        <Border Background="Gainsboro">
+            <Border Margin="6"
+                    CornerRadius="3"
+                    BorderBrush="LightSlateGray"
+                    BorderThickness="3"
+                    Background="WhiteSmoke">
+                <DockPanel>
+                    <Separator DockPanel.Dock="Bottom" Background="LightSlateGray"/>
+
+                    <xctk:BusyIndicator IsBusy="{Binding IsBusy}">
+                        <ContentControl IsTabStop="False"
+                                        Content="{Binding CurrentView}"
+                                        Background="WhiteSmoke" />
+                    </xctk:BusyIndicator>
+                </DockPanel>
+            </Border>
+        </Border>
+
+    </DockPanel>
 </Window>
