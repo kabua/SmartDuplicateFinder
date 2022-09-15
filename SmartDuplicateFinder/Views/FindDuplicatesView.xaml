@@ -6,6 +6,16 @@
              xmlns:local="clr-namespace:SmartDuplicateFinder.Views"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800"
+             d:DataContext="{d:DesignInstance Type=local:FindDuplicatesView, IsDesignTimeCreatable=True}" 
              >
-    <TextBlock>Hello World!</TextBlock>
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="auto" />
+            <ColumnDefinition Width="*" />
+        </Grid.ColumnDefinitions>
+        <TextBlock Grid.Column="0" VerticalAlignment="Center" HorizontalAlignment="Center">Left Side</TextBlock>
+        <GridSplitter Grid.Column="1" Width="5" HorizontalAlignment="Stretch" />
+        <TextBlock Grid.Column="2" VerticalAlignment="Center" HorizontalAlignment="Center">Right Side</TextBlock>
+    </Grid>
 </UserControl>
