@@ -11,4 +11,9 @@
     <Folder Include="Images\" />
   </ItemGroup>
 
+  <ItemGroup>
+    <PackageReference Include="Extended.Wpf.Toolkit" Version="4.4.0" />
+    <PackageReference Include="Ninject" Version="3.3.6" />
+  </ItemGroup>
+
 </Project>

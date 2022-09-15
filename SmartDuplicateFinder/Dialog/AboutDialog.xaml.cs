@@ -18,7 +18,7 @@ public partial class AboutDialog : Window
 		DataContext = this;
 	}
 
-	public string Version { get; private set; }
+	public string? Version { get; private set; }
 
 	private void GetVersionInfo()
 	{

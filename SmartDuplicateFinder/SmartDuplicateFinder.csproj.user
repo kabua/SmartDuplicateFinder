@@ -10,12 +10,18 @@
     <Compile Update="Dialog\AboutDialog.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Update="Views\FindDuplicatesView.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
     <Page Update="Dialog\AboutDialog.xaml">
       <SubType>Designer</SubType>
     </Page>
     <Page Update="MainWindow.xaml">
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Update="Views\FindDuplicatesView.xaml">
       <SubType>Designer</SubType>
     </Page>
   </ItemGroup>

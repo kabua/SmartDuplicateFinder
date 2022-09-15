@@ -1,9 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Configuration;
-using System.Data;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using Ninject;
+using System;
 using System.Windows;
 
 namespace SmartDuplicateFinder
@@ -27,9 +23,20 @@ namespace SmartDuplicateFinder
             AppDomain.CurrentDomain.UnhandledException += CurrentDomainOnUnhandledException;
         }
 
-        public new static App Current { get; private set; }
+        protected override void OnStartup(StartupEventArgs e)
+        {
+	        base.OnStartup(e);
+
+	        ConfigureContainer();
+        }
+
+        public static new App Current { get; private set; }
 
         public static string Name => Constants.AppName;
+
+        public IKernel Container { get; private set; }
+
+        private void ConfigureContainer() => Container = new StandardKernel();
 
         private void CurrentDomainOnUnhandledException(object sender, UnhandledExceptionEventArgs args)
         {
