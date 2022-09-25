@@ -4,17 +4,39 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:SmartDuplicateFinder.Views"
+             xmlns:converters="clr-namespace:SmartDuplicateFinder.Converters"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800"
              d:DataContext="{d:DesignInstance Type=local:FindDuplicatesView, IsDesignTimeCreatable=True}" 
              >
+    <UserControl.Resources>
+        <converters:GetIcon x:Key="_getIcon" />
+    </UserControl.Resources>
+
     <Grid>
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="auto" MinWidth="130" MaxWidth="300"/>
             <ColumnDefinition Width="auto" />
             <ColumnDefinition Width="*" />
         </Grid.ColumnDefinitions>
-        <TextBlock Grid.Column="0" VerticalAlignment="Center" HorizontalAlignment="Center">Left Side</TextBlock>
+        <ListBox Grid.Column="0" ItemsSource="{Binding Path=Drives}"
+                 HorizontalContentAlignment="Stretch">
+            <ListBox.ItemTemplate>
+                <DataTemplate>
+                    <CheckBox 
+                        VerticalContentAlignment="Center" 
+                        IsEnabled="{Binding IsSelectable}"
+                        IsChecked="{Binding Path=IsSelected}">
+                        <CheckBox.Content>
+                            <DockPanel>
+                                <Image DockPanel.Dock="Left" VerticalAlignment="Center" Source="{Binding Icon, Converter={StaticResource _getIcon}}" />
+                                <Label DockPanel.Dock="Left" VerticalAlignment="Center" Content="{Binding DisplayName}"/>
+                            </DockPanel>
+                        </CheckBox.Content>
+                    </CheckBox>
+                </DataTemplate>
+            </ListBox.ItemTemplate>
+        </ListBox>
         <GridSplitter Grid.Column="1" Width="5" HorizontalAlignment="Stretch" />
         <TextBlock Grid.Column="2" VerticalAlignment="Center" HorizontalAlignment="Center">Right Side</TextBlock>
     </Grid>
