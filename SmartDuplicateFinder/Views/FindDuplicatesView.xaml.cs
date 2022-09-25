@@ -1,4 +1,9 @@
-﻿using System.Windows.Controls;
+﻿using SmartDuplicateFinder.ViewModels;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.IO;
+using System.Linq;
+using System.Windows.Controls;
 
 namespace SmartDuplicateFinder.Views;
 /// <summary>
@@ -11,8 +16,19 @@ public partial class FindDuplicatesView : UserControl
 		InitializeComponent();
 		AddCommandBindings();
 
+		Drives = new ObservableCollection<DriveViewModel>();
+
+		IEnumerable<DriveViewModel> drives = DriveInfo.GetDrives().Where(d => d.IsReady).Select(d => new DriveViewModel(d));
+		foreach (DriveViewModel driver in drives)
+		{
+			Drives.Add(driver);
+		}
+
 		DataContext = this;
 	}
+
+	public ObservableCollection<DriveViewModel> Drives { get; set; }
+
 
 	private void AddCommandBindings()
 	{
