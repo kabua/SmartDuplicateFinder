@@ -1,6 +1,7 @@
 ﻿using PropertyChanged;
 using SmartDuplicateFinder.Utils;
 using System;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
@@ -21,30 +22,35 @@ public class DriveViewModel  : INotifyPropertyChanged
 
 	public DriveViewModel(DriveInfo driveInfo)
 	{
-		_driveInfo = driveInfo;
+		DriveInfo = driveInfo;
 
-		Icon = _driveInfo.DriveType switch
+		Icon = DriveInfo.DriveType switch
 		{
-			DriveType.Fixed => _driveInfo.Name.Equals(s_systemDrive, StringComparison.InvariantCultureIgnoreCase) ? Icons.WindowsDrive : Icons.HardDrive,
-			DriveType.Network => _driveInfo.IsReady ? Icons.NetworkConnectedDrive : Icons.NetworkDisconnectedDrive,
+			DriveType.Fixed => DriveInfo.Name.Equals(s_systemDrive, StringComparison.InvariantCultureIgnoreCase) ? Icons.WindowsDrive : Icons.HardDrive,
+			DriveType.Network => DriveInfo.IsReady ? Icons.NetworkConnectedDrive : Icons.NetworkDisconnectedDrive,
 			DriveType.CDRom => Icons.CDRomDrive,
 			DriveType.Removable => Icons.RemovableDrive,
 			_ => Icons.UnknownDrive
 		};
 
-		if (_driveInfo.IsReady)
+		if (DriveInfo.IsReady)
 		{
 			IsSelectable = true;
 
-			DisplayName = $"{_driveInfo.VolumeLabel} ({_driveInfo.Name[..^1]})";
-			Name = _driveInfo.Name[..^1];
+			DisplayName = $"{DriveInfo.VolumeLabel} ({DriveInfo.Name[..^1]})";
+			Name = DriveInfo.Name[..^1];
 		}
 		else
 		{
 			IsSelectable = false;
 
-			DisplayName = Name = $"({_driveInfo.Name[..^1]})";
+			DisplayName = Name = $"({DriveInfo.Name[..^1]})";
 		}
+	
+		SubFolders = new ObservableCollection<DirectoryViewModel>
+		{
+			DirectoryViewModel.UnExpanded
+		};
 	}
 
 	public Icons Icon { get; private set; }
@@ -55,8 +61,9 @@ public class DriveViewModel  : INotifyPropertyChanged
 
 	public bool IsSelectable { get; set; }
 	public bool IsSelected { get; set; }
+	public ObservableCollection<DirectoryViewModel> SubFolders { get; private set; }
+
+	public DriveInfo DriveInfo { get; private set; }
 
 	private static readonly string s_systemDrive;
-
-	private readonly DriveInfo _driveInfo;
 }

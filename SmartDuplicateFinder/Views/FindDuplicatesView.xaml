@@ -5,6 +5,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:SmartDuplicateFinder.Views"
              xmlns:converters="clr-namespace:SmartDuplicateFinder.Converters"
+             xmlns:viewModels="clr-namespace:SmartDuplicateFinder.ViewModels"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800"
              d:DataContext="{d:DesignInstance Type=local:FindDuplicatesView, IsDesignTimeCreatable=True}" 
@@ -19,7 +20,44 @@
             <ColumnDefinition Width="auto" />
             <ColumnDefinition Width="*" />
         </Grid.ColumnDefinitions>
-        <ListBox Grid.Column="0" ItemsSource="{Binding Path=Drives}"
+        <DockPanel Grid.Column="0" 
+                   Margin="6,0">
+            <Label DockPanel.Dock="Top" Content="Drives:"/>
+            <TreeView Padding="0,0,60,0"
+                ItemsSource="{Binding Drives}"
+                      TreeViewItem.Expanded="TreeViewItem_OnExpanded">
+                <TreeView.Resources>
+                    <HierarchicalDataTemplate DataType="{x:Type viewModels:DriveViewModel}" ItemsSource="{Binding SubFolders}">
+                        <CheckBox 
+                            VerticalContentAlignment="Center" 
+                            IsEnabled="{Binding IsSelectable}"
+                            IsChecked="{Binding Path=IsSelected}">
+                            <CheckBox.Content>
+                                <DockPanel>
+                                    <Image DockPanel.Dock="Left" VerticalAlignment="Center" Source="{Binding Icon, Converter={StaticResource _getIcon}}" />
+                                    <Label DockPanel.Dock="Left" VerticalAlignment="Center" Content="{Binding DisplayName}"></Label>
+                                </DockPanel>
+                            </CheckBox.Content>
+                        </CheckBox>
+                    </HierarchicalDataTemplate>
+                    <HierarchicalDataTemplate DataType="{x:Type viewModels:DirectoryViewModel}" ItemsSource="{Binding SubFolders}">
+                        <CheckBox 
+                            VerticalContentAlignment="Center" 
+                            IsEnabled="{Binding IsSelectable}"
+                            IsChecked="{Binding IsSelected}">
+                            <CheckBox.Content>
+                                <DockPanel>
+                                    <Image DockPanel.Dock="Left" VerticalAlignment="Center" Source="{Binding Icon, Converter={StaticResource _getIcon}}" />
+                                    <Label DockPanel.Dock="Left" VerticalAlignment="Center" Content="{Binding DisplayName}"></Label>
+                                </DockPanel>
+                            </CheckBox.Content>
+                        </CheckBox>
+                    </HierarchicalDataTemplate>
+                </TreeView.Resources>
+            </TreeView>
+        </DockPanel>
+        <GridSplitter Grid.Column="1" Width="5" HorizontalAlignment="Stretch" />
+        <ListBox Grid.Column="2" ItemsSource="{Binding Path=Drives}"
                  HorizontalContentAlignment="Stretch">
             <ListBox.ItemTemplate>
                 <DataTemplate>
@@ -37,7 +75,5 @@
                 </DataTemplate>
             </ListBox.ItemTemplate>
         </ListBox>
-        <GridSplitter Grid.Column="1" Width="5" HorizontalAlignment="Stretch" />
-        <TextBlock Grid.Column="2" VerticalAlignment="Center" HorizontalAlignment="Center">Right Side</TextBlock>
     </Grid>
 </UserControl>
