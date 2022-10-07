@@ -32,13 +32,15 @@ public class DirectoryViewModel : INotifyPropertyChanged
 		_directoryInfo = null!;
 		DisplayName = "Loading...";
 		Name = "";
-
-		IsSelectable = true;
-		IsSelected = false;
-		IsExpanded = false;
 		Icon = Icons.OpenFolder;
 
 		SubFolders = new ObservableCollection<DirectoryViewModel>();
+
+		// Must come last, due to OnXxxxChanged() Events.
+		//
+		IsSelectable = true;
+		IsSelected = false;
+		IsExpanded = false;
 	}
 
 	public Icons Icon { get; protected set; }
@@ -59,6 +61,41 @@ public class DirectoryViewModel : INotifyPropertyChanged
 		foreach (var directoryInfo in _directoryInfo.GetDirectories("*", s_options))
 		{
 			SubFolders.Add(new DirectoryViewModel(directoryInfo, this));
+		}
+	}
+
+	// Is called by PropertyChanged.Fody
+	// ReSharper disable once UnusedMember.Global
+	protected virtual void OnIsSelectedChanged()
+	{
+		UpdateIcon();
+
+		if (_parent != null)
+		{
+			var allSiblings = _parent.SubFolders.All(i => i.IsSelected != false);
+			var noSiblings = _parent.SubFolders.All(i => i.IsSelected == false);
+
+			_parent.IsSelected = allSiblings ? true : noSiblings ? false : null;
+		}
+
+		if (IsSelected == false)
+		{
+			foreach (var subFolder in SubFolders)
+			{
+				subFolder.IsSelected = false;
+			}
+		}
+	}
+
+	private void UpdateIcon()
+	{
+		if (IsSelected == true)
+		{
+			Icon = IsExpanded ? Icons.SearchOpenFolder : Icons.SearchCloseFolder;
+		}
+		else
+		{
+			Icon = IsExpanded ? Icons.OpenFolder : Icons.CloseFolder;
 		}
 	}
 
