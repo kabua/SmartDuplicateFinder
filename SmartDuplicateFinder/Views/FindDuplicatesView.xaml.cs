@@ -28,33 +28,9 @@ public partial class FindDuplicatesView : UserControl
 	private void TreeViewItem_OnExpanded(object sender, RoutedEventArgs e)
 	{
 		var treeViewItem = (TreeViewItem)e.OriginalSource;
+		var parent = (DirectoryViewModel) treeViewItem.DataContext;
 
-		if (treeViewItem.DataContext is DirectoryViewModel parent)
-		{
-			if (!(parent.SubFolders.Count == 1 && parent.SubFolders[0] == DirectoryViewModel.UnExpanded))
-				return;
-
-			parent.SubFolders.Clear();
-
-			var options = new EnumerationOptions();
-			foreach (var directoryInfo in parent.DirectoryInfo.GetDirectories("*", options))
-			{
-				parent.SubFolders.Add(new DirectoryViewModel(directoryInfo));
-			}
-		}
-		else if (treeViewItem.DataContext is DriveViewModel drive)
-		{
-			if (!(drive.SubFolders.Count == 1 && drive.SubFolders[0] == DirectoryViewModel.UnExpanded))
-				return;
-
-			drive.SubFolders.Clear();
-
-			var options = new EnumerationOptions();
-			foreach (var directoryInfo in drive.DriveInfo.RootDirectory.GetDirectories("*", options))
-			{
-				drive.SubFolders.Add(new DirectoryViewModel(directoryInfo));
-			}
-		}
+		parent.LoadSubFolders();
 	}
 
 	private void OnRefreshDrivers()
