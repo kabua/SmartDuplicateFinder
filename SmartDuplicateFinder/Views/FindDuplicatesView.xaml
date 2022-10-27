@@ -13,6 +13,10 @@
              >
     <UserControl.Resources>
         <converters:GetIcon x:Key="_getIcon" />
+
+        <Style TargetType="{x:Type Button}" >
+            <Setter Property="Padding" Value="14,3"/>
+        </Style>
     </UserControl.Resources>
 
     <Grid>
@@ -31,6 +35,11 @@
                 <Button DockPanel.Dock="Left" 
                         Command="{x:Static smartDuplicateFinder:AppCommands.Refresh}"
                         Content="{Binding Command.Text, RelativeSource={RelativeSource self} }" />
+
+                <Button DockPanel.Dock="Left"
+                        Margin="12, 0"
+                        Command="{x:Static smartDuplicateFinder:AppCommands.ClearAll}"
+                        Content="{Binding Command.Text, RelativeSource={RelativeSource self} }" />
             </DockPanel>
             <TreeView Padding="0,0,60,0"
                       ItemsSource="{Binding Drives}"
@@ -44,7 +53,7 @@
                             <CheckBox.Content>
                                 <DockPanel>
                                     <Image DockPanel.Dock="Left" VerticalAlignment="Center" Source="{Binding Icon, Converter={StaticResource _getIcon}}" />
-                                    <Label DockPanel.Dock="Left" VerticalAlignment="Center" Content="{Binding DisplayName}"></Label>
+                                    <TextBlock DockPanel.Dock="Left" VerticalAlignment="Center" Text="{Binding DisplayName}"></TextBlock>
                                 </DockPanel>
                             </CheckBox.Content>
                         </CheckBox>
@@ -57,7 +66,7 @@
                             <CheckBox.Content>
                                 <DockPanel>
                                     <Image DockPanel.Dock="Left" VerticalAlignment="Center" Source="{Binding Icon, Converter={StaticResource _getIcon}}" />
-                                    <Label DockPanel.Dock="Left" VerticalAlignment="Center" Content="{Binding DisplayName}"></Label>
+                                    <TextBlock DockPanel.Dock="Left" VerticalAlignment="Center" Text="{Binding DisplayName}"></TextBlock>
                                 </DockPanel>
                             </CheckBox.Content>
                         </CheckBox>
