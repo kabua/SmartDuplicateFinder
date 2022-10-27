@@ -1,13 +1,8 @@
-﻿using PropertyChanged;
-using SmartDuplicateFinder.Utils;
+﻿using SmartDuplicateFinder.Utils;
 using System;
-using System.Diagnostics;
 using System.IO;
 
 namespace SmartDuplicateFinder.ViewModels;
-
-[AddINotifyPropertyChangedInterface]
-[DebuggerDisplay("{Name}")]
 
 public class DriveViewModel  : DirectoryViewModel
 {

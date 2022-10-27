@@ -9,6 +9,7 @@ using System.Windows.Controls;
 using System.Windows.Input;
 
 namespace SmartDuplicateFinder.Views;
+
 /// <summary>
 /// Interaction logic for FindDuplicatesView.xaml
 /// </summary>
@@ -38,7 +39,7 @@ public partial class FindDuplicatesView : UserControl
 	{
 		var treeNodes = new Stack<DirectoryViewModel>();
 
-		foreach (DriveViewModel drive in Drives.Reverse())
+		foreach (DriveViewModel drive in Drives.Where(d => d != DirectoryViewModel.UnExpanded).Reverse())
 		{
 			if (process(drive))
 			{
@@ -48,7 +49,7 @@ public partial class FindDuplicatesView : UserControl
 
 		while(treeNodes.TryPop(out var folder))
 		{
-			foreach (DirectoryViewModel item in folder.SubFolders.Reverse())
+			foreach (DirectoryViewModel item in folder.SubFolders.Where(d => d != DirectoryViewModel.UnExpanded).Reverse())
 			{
 				if (process(item))
 				{

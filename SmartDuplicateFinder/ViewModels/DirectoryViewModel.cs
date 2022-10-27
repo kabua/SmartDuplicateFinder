@@ -1,4 +1,5 @@
-﻿using SmartDuplicateFinder.Utils;
+﻿using PropertyChanged;
+using SmartDuplicateFinder.Utils;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Diagnostics;
@@ -7,7 +8,8 @@ using System.Linq;
 
 namespace SmartDuplicateFinder.ViewModels;
 
-[DebuggerDisplay("{Name}")]
+[AddINotifyPropertyChangedInterface]
+[DebuggerDisplay("{DisplayName}")]
 public class DirectoryViewModel : INotifyPropertyChanged
 {
 	public static readonly DirectoryViewModel UnExpanded = new ();
