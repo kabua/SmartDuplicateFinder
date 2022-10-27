@@ -1,14 +1,15 @@
-﻿using System;
+﻿using PropertyChanged;
+using SmartDuplicateFinder.Utils;
+using System;
 using System.Diagnostics;
 using System.IO;
-using PropertyChanged;
-using SmartDuplicateFinder.Utils;
 
 namespace SmartDuplicateFinder.ViewModels;
 
 [AddINotifyPropertyChangedInterface]
-[DebuggerDisplay("{DisplayName}")]
-public class DriveViewModel : DirectoryViewModel
+[DebuggerDisplay("{Name}")]
+
+public class DriveViewModel  : DirectoryViewModel
 {
 	static DriveViewModel()
 	{
@@ -16,31 +17,35 @@ public class DriveViewModel : DirectoryViewModel
 	}
 
 	public DriveViewModel(DriveInfo driveInfo)
-		: base(driveInfo.RootDirectory, null!)
+		: base (driveInfo.RootDirectory, null!)
 	{
-		Icon = driveInfo.DriveType switch
+		DriveInfo = driveInfo;
+
+		Icon = DriveInfo.DriveType switch
 		{
-			DriveType.Fixed => driveInfo.Name.Equals(s_systemDrive, StringComparison.InvariantCultureIgnoreCase) ? Icons.WindowsDrive : Icons.HardDrive,
-			DriveType.Network => driveInfo.IsReady ? Icons.NetworkConnectedDrive : Icons.NetworkDisconnectedDrive,
+			DriveType.Fixed => DriveInfo.Name.Equals(s_systemDrive, StringComparison.InvariantCultureIgnoreCase) ? Icons.WindowsDrive : Icons.HardDrive,
+			DriveType.Network => DriveInfo.IsReady ? Icons.NetworkConnectedDrive : Icons.NetworkDisconnectedDrive,
 			DriveType.CDRom => Icons.CDRomDrive,
 			DriveType.Removable => Icons.RemovableDrive,
 			_ => Icons.UnknownDrive
 		};
 
-		if (driveInfo.IsReady)
+		if (DriveInfo.IsReady)
 		{
 			IsSelectable = true;
 
-			DisplayName = $"{driveInfo.VolumeLabel} ({driveInfo.Name[..^1]})";
-			Name = driveInfo.Name[..^1];
+			DisplayName = $"{DriveInfo.VolumeLabel} ({DriveInfo.Name[..^1]})";
+			Name = DriveInfo.Name[..^1];
 		}
 		else
 		{
 			IsSelectable = false;
 
-			DisplayName = Name = $"({driveInfo.Name[..^1]})";
+			DisplayName = Name = $"({DriveInfo.Name[..^1]})";
 		}
 	}
+
+	public DriveInfo DriveInfo { get; private set; }
 
 	private static readonly string s_systemDrive;
 }
