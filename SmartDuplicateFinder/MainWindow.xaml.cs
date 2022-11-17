@@ -16,57 +16,56 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 
-namespace SmartDuplicateFinder
+namespace SmartDuplicateFinder;
+
+/// <summary>
+/// Interaction logic for MainWindow.xaml
+/// </summary>
+public partial class MainWindow : Window
 {
-    /// <summary>
-    /// Interaction logic for MainWindow.xaml
-    /// </summary>
-    public partial class MainWindow : Window
-    {
-        public MainWindow()
-        {
-            InitializeComponent();
-            AddCommandBindings();
+	public MainWindow()
+	{
+		InitializeComponent();
+		AddCommandBindings();
 
-            var view = App.Current.Container.Get<FindDuplicatesView>();
-            SetView(view);
+		var view = App.Current.Container.Get<FindDuplicatesView>();
+		SetView(view);
 
-            Title = App.Name;
-            DataContext = this;
-        }
+		Title = App.Name;
+		DataContext = this;
+	}
 
-        public bool IsBusy { get; set; }
+	public bool IsBusy { get; set; }
 
-        public Control CurrentView { get; private set; }
+	public Control CurrentView { get; private set; }
 
-        private void SetView(Control view)
-        {
-	        CurrentView = view;
-        }
+	private void SetView(Control view)
+	{
+		CurrentView = view;
+	}
 
-        private void ShowAbout()
-        {
-			var dialog = new AboutDialog
-			{
-				Owner = this
-			};
+	private void ShowAbout()
+	{
+		var dialog = new AboutDialog
+		{
+			Owner = this
+		};
 
-			dialog.ShowDialog();
-		}
+		dialog.ShowDialog();
+	}
 
-        private void AddCommandBindings()
-        {
-            //
-            // File Menu
-            //
+	private void AddCommandBindings()
+	{
+		//
+		// File Menu
+		//
 
-            CommandBindings.Add(new CommandBinding(AppCommands.Exit, (sender, args) => Close()));
+		CommandBindings.Add(new CommandBinding(AppCommands.Exit, (sender, args) => Close()));
 
-            //
-            // Help Menu
-            //
+		//
+		// Help Menu
+		//
 
-            CommandBindings.Add(new CommandBinding(AppCommands.AboutHelp, (sender, args) => ShowAbout()));
-        }
-    }
+		CommandBindings.Add(new CommandBinding(AppCommands.AboutHelp, (sender, args) => ShowAbout()));
+	}
 }
