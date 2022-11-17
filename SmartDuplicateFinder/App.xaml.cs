@@ -36,6 +36,8 @@ namespace SmartDuplicateFinder
 
         public IKernel Container { get; private set; }
 
+        public static bool InDesignMode() => Application.Current is not App;
+		
         private void ConfigureContainer() => Container = new StandardKernel();
 
         private void CurrentDomainOnUnhandledException(object sender, UnhandledExceptionEventArgs args)
