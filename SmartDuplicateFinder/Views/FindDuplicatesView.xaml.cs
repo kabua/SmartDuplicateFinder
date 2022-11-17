@@ -1,5 +1,6 @@
 ﻿using Ninject;
 using Ookii.Dialogs.Wpf;
+using SmartDuplicateFinder.Extensions;
 using SmartDuplicateFinder.Services;
 using SmartDuplicateFinder.ViewModels;
 using System;
@@ -26,17 +27,37 @@ public partial class FindDuplicatesView : UserControl, INotifyPropertyChanged
 		_imexService = imexService;
 	}
 
+#pragma warning disable CS8618 // Non-nullable _imexService but is set if in design mode.
 	public FindDuplicatesView()
+#pragma warning restore CS8618
 	{
 		InitializeComponent();
 		AddCommandBindings();
 
+		Drives = new ObservableCollection<DriveViewModel>();
+		ScanVerb = Constants.ScanVerbName;
+
 		if (App.InDesignMode())
 		{
 			_imexService = new ImexService();
+
+			IsScanning = true;
+			StepProgress = new DesignTimeProgressManager();
+			SummaryProgress = new DesignTimeProgressManager();
+
+			var fullFileName = @"D:\Dev.old\Repos\GainsCapitalRateDownLoader\packages\HtmlAgilityPack.1.4.9.5\lib\portable-net45+netcore45+wp8+MonoAndroid+MonoTouch";
+			//fullFileName = fullFileName.ShortenPathname();
+			((IUpdateProgress)StepProgress).Update(65, fullFileName, 100);
+			((IUpdateProgress)SummaryProgress).Update(double.NaN, "Step 1 of 3", 0);
+
+			ElapsedTime = new TimeSpan(5, 43, 21);
 		}
-		Drives = new ObservableCollection<DriveViewModel>();
-		ScanVerb = Constants.ScanVerbName;
+		else
+		{
+			StepProgress = new UpdateProgressManager(App.Current.Dispatcher);
+			SummaryProgress = new UpdateProgressManager(App.Current.Dispatcher);
+		}
+
 		OnRefreshDrivers();
 
 		DataContext = this;
@@ -46,6 +67,11 @@ public partial class FindDuplicatesView : UserControl, INotifyPropertyChanged
 	public bool IsScanning { get; private set; }
 
 	public ObservableCollection<DriveViewModel> Drives { get; private set; }
+
+	public IProgress StepProgress { get; private set; }
+	public IProgress SummaryProgress { get; private set; }
+	public TimeSpan ElapsedTime { get; private set; }
+
 
 	private void TreeViewItem_OnExpanded(object sender, RoutedEventArgs e)
 	{
@@ -197,17 +223,31 @@ public partial class FindDuplicatesView : UserControl, INotifyPropertyChanged
 
 	private async void ScanAsync()
 	{
-		try
+		await Task.Run(async () =>
 		{
-			IsScanning = true;
+			try
+			{
+				IsScanning = true;
 
-			//var rootFolders = GetRootFolders();
-			await Task.Delay(TimeSpan.FromSeconds(10));
-		}
-		finally
-		{
-			IsScanning = false;
-		}
+				//var rootFolders = GetRootFolders();
+
+				((IUpdateProgress)StepProgress).Update(0, new string(' ', 75), 0);
+				await Task.Delay(TimeSpan.FromMilliseconds(100));
+
+				var count = 10000;
+				for (int i = 0; i < count; i++)
+				{
+					var fullFileName = $@"D:\Dev.old\Repos\GainsCapitalRateDownLoader\packages\HtmlAgilityPack.1.4.9.5\lib\portable-net45+netcore45+wp8+MonoAndroid+MonoTouch\{i}\HtmlAgilityPack.dll";
+					//var fullFileName = $@"D:\Dev.oldReposGainsCapitalRateDownLoaderpackagesHtmlAgilityPack.1.4.9.5libportable-net45+netcore45+wp8+MonoAndroid+MonoTouch{i}HtmlAgilityPack.dll";
+					((IUpdateProgress)StepProgress).Update(i, fullFileName, count);
+					await Task.Delay(TimeSpan.FromMilliseconds(100));
+				}
+			}
+			finally
+			{
+				IsScanning = false;
+			}
+		});
 	}
 
 	private void AddCommandBindings()

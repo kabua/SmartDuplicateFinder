@@ -12,9 +12,12 @@
              d:DataContext="{d:DesignInstance Type=local:FindDuplicatesView, IsDesignTimeCreatable=True}" 
              >
     <UserControl.Resources>
-        <converters:GetIcon x:Key="_getIcon" />
+        <converters:GetIconConverter x:Key="_getIcon" />
         <converters:BoolToVisibilityConverter x:Key="_trueToVisibilityConverter" TrueValue="Visible" FalseValue="Collapsed" />
         <converters:BoolToVisibilityConverter x:Key="_falseToVisibilityConverter" TrueValue="Collapsed" FalseValue="Visible" />
+        <converters:TimeSpanToWordsConverter x:Key="_timeSpanToStringConverter" />
+        <converters:ProgressToIsIndeterminateConverter x:Key="_isIndeterminateConverter" />
+        <converters:ShortenPathnameConverter x:Key="_shortenPathnameConverter" />
 
         <Style TargetType="{x:Type Button}" >
             <Setter Property="Padding" Value="14,3"/>
@@ -107,8 +110,6 @@
                         <RowDefinition Height="auto" />
                         <RowDefinition Height="auto" />
                         <RowDefinition Height="auto" />
-                        <RowDefinition Height="Auto" />
-                        <RowDefinition Height="auto" />
                         <RowDefinition Height="auto" />
                         <RowDefinition Height="auto" />
                         <RowDefinition Height="auto" />
@@ -120,15 +121,37 @@
                     <TextBlock Grid.Row="1" 
                                TextWrapping="Wrap">This may take a while...</TextBlock>
 
-                    <TextBlock Grid.Row="3" Margin="0,60,0,0" Text="Filename..."/>
+                    <ProgressBar Grid.Row="2" 
+                                 Margin="0, 60, 0, 0" 
+                                 Height="10"
+                                 IsIndeterminate="{Binding StepProgress, Mode=OneWay, Converter={StaticResource _isIndeterminateConverter}}"
+                                 Value="{Binding StepProgress.Current, Mode=OneWay}" 
+                                 Maximum="{Binding StepProgress.Total, Mode=OneWay}"  />
+                    <!--<TextBlock Grid.Row="3" 
+                               Text="{Binding StepProgress.Description, Mode=OneWay}"/>-->
+                    <TextBlock Grid.Row="3">
+                        <TextBlock.Text>
+                            <MultiBinding Converter="{StaticResource _shortenPathnameConverter}">
+                                <MultiBinding.Bindings>
+                                    <Binding RelativeSource="{x:Static RelativeSource.Self}"/>
+                                    <Binding Path="StepProgress.Description" />
+                                </MultiBinding.Bindings>
+                            </MultiBinding>
+                        </TextBlock.Text>
+                    </TextBlock>
 
-                    <ProgressBar Grid.Row="4" Margin="0, 6, 0, 0" Height="10" Value="5" Maximum="100"  />
-                    <TextBlock Grid.Row="5" Text="Step description..."/>
+                    <ProgressBar Grid.Row="4" 
+                                 Margin="0, 18, 0, 0" 
+                                 Height="10" 
+                                 IsIndeterminate="{Binding SummaryProgress, Mode=OneWay, Converter={StaticResource _isIndeterminateConverter}}"
+                                 Value="{Binding SummaryProgress.Current, Mode=OneWay}" 
+                                 Maximum="{Binding SummaryProgress.Total, Mode=OneWay}"  />
 
-                    <ProgressBar Grid.Row="6" Margin="0, 18, 0, 0" Height="10" Value="10" Maximum="100"  />
-                    <TextBlock Grid.Row="7" Text="General description..."/>
+                    <TextBlock Grid.Row="5" Text="{Binding SummaryProgress.Description, Mode=OneWay}"/>
 
-                    <TextBlock Grid.Row="8" Margin="0, 6, 0, 0" >Time elapsed: <Run Text="5 hours" /></TextBlock>
+                    <TextBlock Grid.Row="6" 
+                               Margin="0, 6, 0, 0" 
+                               >Time elapsed: <Run Text="{Binding ElapsedTime, Mode=OneWay, Converter={StaticResource _timeSpanToStringConverter}}" /></TextBlock>
                 </Grid>
             </Grid>
         </DockPanel>

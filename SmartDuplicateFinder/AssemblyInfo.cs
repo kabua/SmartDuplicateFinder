@@ -1,3 +1,5 @@
+using System;
+using System.Diagnostics;
 using System.Windows;
 
 [assembly: ThemeInfo(
