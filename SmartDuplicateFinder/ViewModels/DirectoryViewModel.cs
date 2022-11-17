@@ -24,6 +24,7 @@ public class DirectoryViewModel : INotifyPropertyChanged
 
 		DisplayName = _directoryInfo.Name;
 		Name = _directoryInfo.Name;
+		FullPath = _directoryInfo?.FullName ?? string.Empty;
 
 		if (HasSubFolders())
 		{
@@ -36,6 +37,7 @@ public class DirectoryViewModel : INotifyPropertyChanged
 		_directoryInfo = null!;
 		DisplayName = "Loading...";
 		Name = "";
+		FullPath = "";
 		Icon = Icons.OpenFolder;
 
 		SubFolders = new ObservableCollection<DirectoryViewModel>();
@@ -51,6 +53,7 @@ public class DirectoryViewModel : INotifyPropertyChanged
 
 	public string DisplayName { get; protected set; }
 	public string Name { get; protected set; }
+	public string FullPath { get; protected set; }
 
 	public bool IsSelectable { get; set; }
 	public bool? IsSelected { get; set; }

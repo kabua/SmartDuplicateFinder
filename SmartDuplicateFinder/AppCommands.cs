@@ -22,4 +22,5 @@ public static class AppCommands
     //
     public static readonly RoutedUICommand Refresh = new ("_Refresh", "Refresh", OwnerType);
     public static readonly RoutedUICommand ClearAll = new ("Clear _All", "Clear", OwnerType);
+    public static readonly RoutedUICommand Scan = new("_Scan", "Scan", OwnerType);
 }

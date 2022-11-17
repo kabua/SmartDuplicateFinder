@@ -13,6 +13,8 @@
              >
     <UserControl.Resources>
         <converters:GetIcon x:Key="_getIcon" />
+        <converters:BoolToVisibilityConverter x:Key="_trueToVisibilityConverter" TrueValue="Visible" FalseValue="Collapsed" />
+        <converters:BoolToVisibilityConverter x:Key="_falseToVisibilityConverter" TrueValue="Collapsed" FalseValue="Visible" />
 
         <Style TargetType="{x:Type Button}" >
             <Setter Property="Padding" Value="14,3"/>
@@ -75,23 +77,60 @@
             </TreeView>
         </DockPanel>
         <GridSplitter Grid.Column="1" Width="5" HorizontalAlignment="Stretch" />
-        <ListBox Grid.Column="2" ItemsSource="{Binding Path=Drives}"
-                 HorizontalContentAlignment="Stretch">
-            <ListBox.ItemTemplate>
-                <DataTemplate>
-                    <CheckBox 
-                        VerticalContentAlignment="Center" 
-                        IsEnabled="{Binding IsSelectable}"
-                        IsChecked="{Binding Path=IsSelected}">
-                        <CheckBox.Content>
-                            <DockPanel>
-                                <Image DockPanel.Dock="Left" VerticalAlignment="Center" Source="{Binding Icon, Converter={StaticResource _getIcon}}" />
-                                <Label DockPanel.Dock="Left" VerticalAlignment="Center" Content="{Binding DisplayName}"/>
-                            </DockPanel>
-                        </CheckBox.Content>
-                    </CheckBox>
-                </DataTemplate>
-            </ListBox.ItemTemplate>
-        </ListBox>
+        <DockPanel Grid.Column="2"
+                   Margin="12"
+                   LastChildFill="true">
+            <DockPanel Dock="Top"
+                       LastChildFill="False">
+                <TextBlock Foreground="DodgerBlue" FontSize="16" VerticalAlignment="Center"><Run Text="{Binding ScanVerb}"/> for Duplicate Files</TextBlock>
+                <Button DockPanel.Dock="Right"
+                        Command="{x:Static smartDuplicateFinder:AppCommands.Scan}"
+                        Content="{Binding Command.Text, RelativeSource={RelativeSource self}}" />
+            </DockPanel>
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="auto" />
+                    <RowDefinition Height="auto" />
+                    <RowDefinition Height="*" />
+                </Grid.RowDefinitions>
+                <TextBlock Grid.Row="0" 
+                           Margin="0,30,0,0" 
+                           VerticalAlignment="Bottom" 
+                           
+                           Visibility="{Binding Path=IsScanning, Converter={StaticResource _falseToVisibilityConverter}}"
+                           TextWrapping="Wrap">This program can scan for duplicate files and folders from the selected locations.</TextBlock>
+
+                <Grid Grid.Row="1" 
+                      Visibility="{Binding Path=IsScanning, Converter={StaticResource _trueToVisibilityConverter}}">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="auto" />
+                        <RowDefinition Height="auto" />
+                        <RowDefinition Height="auto" />
+                        <RowDefinition Height="auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="auto" />
+                        <RowDefinition Height="auto" />
+                        <RowDefinition Height="auto" />
+                        <RowDefinition Height="auto" />
+                    </Grid.RowDefinitions>
+                    <TextBlock Grid.Row="0" 
+                               Margin="0,30,0,0" 
+                               VerticalAlignment="Bottom" 
+                               TextWrapping="Wrap">This program is scanning for duplicate files and folders from the selected locations.</TextBlock>
+                    <TextBlock Grid.Row="1" 
+                               TextWrapping="Wrap">This may take a while...</TextBlock>
+
+                    <TextBlock Grid.Row="3" Margin="0,60,0,0" Text="Filename..."/>
+
+                    <ProgressBar Grid.Row="4" Margin="0, 6, 0, 0" Height="10" Value="5" Maximum="100"  />
+                    <TextBlock Grid.Row="5" Text="Step description..."/>
+
+                    <ProgressBar Grid.Row="6" Margin="0, 18, 0, 0" Height="10" Value="10" Maximum="100"  />
+                    <TextBlock Grid.Row="7" Text="General description..."/>
+
+                    <TextBlock Grid.Row="8" Margin="0, 6, 0, 0" >Time elapsed: <Run Text="5 hours" /></TextBlock>
+                </Grid>
+            </Grid>
+        </DockPanel>
     </Grid>
 </UserControl>
