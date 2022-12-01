@@ -7,12 +7,14 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using System.Windows.Threading;
 
 namespace SmartDuplicateFinder.Views;
 
@@ -21,36 +23,32 @@ namespace SmartDuplicateFinder.Views;
 /// </summary>
 public partial class FindDuplicatesView : UserControl, INotifyPropertyChanged
 {
-	[Inject]
-	public FindDuplicatesView(ImexService imexService) : this()
+	// Called by the GUI designer
+	//
+	public FindDuplicatesView()
+		: this(new ImexService(), new FindDuplicateFilesService())
 	{
-		_imexService = imexService;
 	}
 
 #pragma warning disable CS8618 // Non-nullable _imexService but is set if in design mode.
-	public FindDuplicatesView()
+	[Inject]
+	public FindDuplicatesView(ImexService imexService, FindDuplicateFilesService duplicateFilesService)
 #pragma warning restore CS8618
 	{
 		InitializeComponent();
 		AddCommandBindings();
+
+		_imexService = imexService;
+		_duplicateFilesService = duplicateFilesService;
+		ElapsedTime = TimeSpan.Zero;
 
 		Drives = new ObservableCollection<DriveViewModel>();
 		ScanVerb = Constants.ScanVerbName;
 
 		if (App.InDesignMode())
 		{
-			_imexService = new ImexService();
-
-			IsScanning = true;
 			StepProgress = new DesignTimeProgressManager();
 			SummaryProgress = new DesignTimeProgressManager();
-
-			var fullFileName = @"D:\Dev.old\Repos\GainsCapitalRateDownLoader\packages\HtmlAgilityPack.1.4.9.5\lib\portable-net45+netcore45+wp8+MonoAndroid+MonoTouch";
-			//fullFileName = fullFileName.ShortenPathname();
-			((IUpdateProgress)StepProgress).Update(65, fullFileName, 100);
-			((IUpdateProgress)SummaryProgress).Update(double.NaN, "Step 1 of 3", 0);
-
-			ElapsedTime = new TimeSpan(5, 43, 21);
 		}
 		else
 		{
@@ -58,9 +56,31 @@ public partial class FindDuplicatesView : UserControl, INotifyPropertyChanged
 			SummaryProgress = new UpdateProgressManager(App.Current.Dispatcher);
 		}
 
+		_duplicateFilesService.StepProgress = StepProgress;
+		_duplicateFilesService.SummaryProgress = SummaryProgress;
+		_stopwatch = new Stopwatch();
+		_timer = new DispatcherTimer(DispatcherPriority.Send, Dispatcher.CurrentDispatcher)
+		{
+			Interval = TimeSpan.FromSeconds(1),
+		};
+		_timer.Tick += TimerOnTick;
+
 		OnRefreshDrivers();
 
 		DataContext = this;
+
+		if (App.InDesignMode())
+		{
+			IsScanning = true;
+
+			var fullFileName = @"D:\Dev.old\Repos\GainsCapitalRateDownLoader\packages\HtmlAgilityPack.1.4.9.5\lib\portable-net45+netcore45+wp8+MonoAndroid+MonoTouch\\HtmlAgilityPack.dll";
+			fullFileName = fullFileName.ShortenPathname();
+
+			((IUpdateProgress)StepProgress).Update(65, fullFileName, 100);
+			((IUpdateProgress)SummaryProgress).Update(double.NaN, "Step 1 of 3", 0);
+
+			ElapsedTime = new TimeSpan(5, 43, 21);
+		}
 	}
 
 	public string ScanVerb { get; set; }
@@ -112,9 +132,23 @@ public partial class FindDuplicatesView : UserControl, INotifyPropertyChanged
 	private void OnIsScanningChanged()
 #pragma warning restore IDE0051
 	{
-		ScanVerb = IsScanning ? Constants.ScanningVerbName : Constants.ScanVerbName;
+		if (IsScanning)
+		{
+			ScanVerb = Constants.ScanningVerbName;
+			_stopwatch.Reset();
+			_stopwatch.Restart();
+			_timer.Start();
+		}
+		else
+		{
+			ScanVerb = Constants.ScanVerbName;
+			_timer.Stop();
+			_stopwatch.Stop();
+			_stopwatch.Reset();
+		}
 	}
 
+	private void TimerOnTick(object? sender, EventArgs e) => ElapsedTime = _stopwatch.Elapsed;
 
 	private void OnSaveSelection()
 	{
@@ -229,18 +263,22 @@ public partial class FindDuplicatesView : UserControl, INotifyPropertyChanged
 			{
 				IsScanning = true;
 
-				//var rootFolders = GetRootFolders();
-
 				((IUpdateProgress)StepProgress).Update(0, new string(' ', 75), 0);
-				await Task.Delay(TimeSpan.FromMilliseconds(100));
 
-				var count = 10000;
+				var count = 100_000_000;
 				for (int i = 0; i < count; i++)
 				{
 					var fullFileName = $@"D:\Dev.old\Repos\GainsCapitalRateDownLoader\packages\HtmlAgilityPack.1.4.9.5\lib\portable-net45+netcore45+wp8+MonoAndroid+MonoTouch\{i}\HtmlAgilityPack.dll";
-					//var fullFileName = $@"D:\Dev.oldReposGainsCapitalRateDownLoaderpackagesHtmlAgilityPack.1.4.9.5libportable-net45+netcore45+wp8+MonoAndroid+MonoTouch{i}HtmlAgilityPack.dll";
-					((IUpdateProgress)StepProgress).Update(i, fullFileName, count);
-					await Task.Delay(TimeSpan.FromMilliseconds(100));
+
+					if (i % 100 == 0)
+					{
+						((IUpdateProgress)StepProgress).Update(i, fullFileName, count);
+					}
+
+					if (_stopwatch.Elapsed.TotalSeconds > 10)
+					{
+						break;
+					}
 				}
 			}
 			finally
@@ -262,4 +300,8 @@ public partial class FindDuplicatesView : UserControl, INotifyPropertyChanged
 	}
 
 	private readonly ImexService _imexService;
+	private readonly FindDuplicateFilesService _duplicateFilesService;
+
+	private readonly Stopwatch _stopwatch;
+	private readonly DispatcherTimer _timer;
 }
