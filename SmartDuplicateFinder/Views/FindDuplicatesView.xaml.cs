@@ -5,6 +5,7 @@ using SmartDuplicateFinder.Services;
 using SmartDuplicateFinder.ViewModels;
 using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Diagnostics;
@@ -56,8 +57,8 @@ public partial class FindDuplicatesView : UserControl, INotifyPropertyChanged
 			SummaryProgress = new UpdateProgressManager(App.Current.Dispatcher);
 		}
 
-		_duplicateFilesService.StepProgress = StepProgress;
-		_duplicateFilesService.SummaryProgress = SummaryProgress;
+		_duplicateFilesService.StepUpdater = (IUpdateProgress) StepProgress;
+		_duplicateFilesService.SummaryUpdater = (IUpdateProgress) SummaryProgress;
 		_stopwatch = new Stopwatch();
 		_timer = new DispatcherTimer(DispatcherPriority.Send, Dispatcher.CurrentDispatcher)
 		{
@@ -65,7 +66,7 @@ public partial class FindDuplicatesView : UserControl, INotifyPropertyChanged
 		};
 		_timer.Tick += TimerOnTick;
 
-		OnRefreshDrivers();
+		RefreshDrivers();
 
 		DataContext = this;
 
@@ -148,6 +149,57 @@ public partial class FindDuplicatesView : UserControl, INotifyPropertyChanged
 		}
 	}
 
+	private void RefreshDrivers()
+	{
+		Drives.Clear();
+
+		IEnumerable<DriveViewModel> drives = DriveInfo.GetDrives().Where(d => d.IsReady).Select(d => new DriveViewModel(d));
+		foreach (DriveViewModel driver in drives)
+		{
+			Drives.Add(driver);
+		}
+	}
+
+	private void SaveSelection(string fileName)
+	{
+		try
+		{
+			var rootFolderNames = GetRootFolders().Select(r => r.FullPath).ToArray();
+			_imexService.Save(fileName, rootFolderNames);
+		}
+		catch (Exception e)
+		{
+			MessageBox.Show(Window.GetWindow(this)!, e.Message, App.Name, MessageBoxButton.OK, MessageBoxImage.Error);
+		}
+	}
+
+	private void LoadSelection(VistaOpenFileDialog dialog)
+	{
+		var rootFolderNames = _imexService.Load(dialog.FileName);
+		foreach (var fullFolderName in rootFolderNames)
+		{
+			var folders = new Queue<string>(fullFolderName.Split(Path.DirectorySeparatorChar));
+			var driveName = folders.Dequeue();
+
+			var folderVm =
+				Drives.FirstOrDefault(d => d.Name.Equals(driveName, StringComparison.CurrentCultureIgnoreCase)) as DirectoryViewModel;
+			while (folders.Count > 0 && folderVm != null)
+			{
+				folderVm.IsExpanded = true;
+				folderVm.LoadSubFolders();
+
+				var folderName = folders.Dequeue();
+				folderVm = folderVm.SubFolders.FirstOrDefault(d => d.Name.Equals(folderName, StringComparison.CurrentCultureIgnoreCase));
+
+				if (folders.Count == 0 && folderVm != null)
+				{
+					folderVm.IsSelected = true;
+				}
+			}
+		}
+	}
+
+
 	private void TimerOnTick(object? sender, EventArgs e) => ElapsedTime = _stopwatch.Elapsed;
 
 	private void OnSaveSelection()
@@ -166,15 +218,7 @@ public partial class FindDuplicatesView : UserControl, INotifyPropertyChanged
 		if (dialog.ShowDialog(Window.GetWindow(this)) != true)
 			return;
 
-		try
-		{
-			var rootFolderNames = GetRootFolders().Select(r => r.FullPath).ToArray();
-			_imexService.Save(dialog.FileName, rootFolderNames);
-		}
-		catch (Exception e)
-		{
-			MessageBox.Show(Window.GetWindow(this)!, e.Message, App.Name, MessageBoxButton.OK, MessageBoxImage.Error);
-		}
+		SaveSelection(dialog.FileName);
 	}
 
 	private void OnLoadSelection()
@@ -194,41 +238,14 @@ public partial class FindDuplicatesView : UserControl, INotifyPropertyChanged
 		if (dialog.ShowDialog(Window.GetWindow(this)) != true)
 			return;
 
-		var rootFolderNames = _imexService.Load(dialog.FileName);
-		foreach (var fullFolderName in rootFolderNames)
-		{
-			var folders = new Queue<string>(fullFolderName.Split(Path.DirectorySeparatorChar));
-			var driveName = folders.Dequeue();
-
-			var folderVm = Drives.FirstOrDefault(d => d.Name.Equals(driveName, StringComparison.CurrentCultureIgnoreCase)) as DirectoryViewModel;
-			while (folders.Count > 0 && folderVm != null)
-			{
-				folderVm.IsExpanded = true;
-				folderVm.LoadSubFolders();
-
-				var folderName = folders.Dequeue();
-				folderVm = folderVm.SubFolders.FirstOrDefault(d => d.Name.Equals(folderName, StringComparison.CurrentCultureIgnoreCase));
-
-				if (folders.Count == 0 && folderVm != null)
-				{
-					folderVm.IsSelected = true;
-				}
-			}
-		}
+		LoadSelection(dialog);
 	}
 
-	private void OnRefreshDrivers()
-	{
-		Drives.Clear();
 
-		IEnumerable<DriveViewModel> drives = DriveInfo.GetDrives().Where(d => d.IsReady).Select(d => new DriveViewModel(d));
-		foreach (DriveViewModel driver in drives)
-		{
-			Drives.Add(driver);
-		}
-	}
+	private void OnRefreshDrivers() => RefreshDrivers();
 
-	private void OnClearAll()
+	private void OnClearAll() => ClearAll();
+	private void ClearAll()
 	{
 		WalkTree(d => d.IsSelected != false, d =>
 		{
@@ -255,7 +272,7 @@ public partial class FindDuplicatesView : UserControl, INotifyPropertyChanged
 	}
 
 
-	private async void ScanAsync()
+	private async void OnScanAsync()
 	{
 		await Task.Run(async () =>
 		{
@@ -263,23 +280,8 @@ public partial class FindDuplicatesView : UserControl, INotifyPropertyChanged
 			{
 				IsScanning = true;
 
-				((IUpdateProgress)StepProgress).Update(0, new string(' ', 75), 0);
-
-				var count = 100_000_000;
-				for (int i = 0; i < count; i++)
-				{
-					var fullFileName = $@"D:\Dev.old\Repos\GainsCapitalRateDownLoader\packages\HtmlAgilityPack.1.4.9.5\lib\portable-net45+netcore45+wp8+MonoAndroid+MonoTouch\{i}\HtmlAgilityPack.dll";
-
-					if (i % 100 == 0)
-					{
-						((IUpdateProgress)StepProgress).Update(i, fullFileName, count);
-					}
-
-					if (_stopwatch.Elapsed.TotalSeconds > 10)
-					{
-						break;
-					}
-				}
+				var rootFolders = GetRootFolders().Select(vm => vm.DirectoryInfo).ToImmutableArray();
+				_duplicateFilesService.ReadAllFiles(rootFolders);
 			}
 			finally
 			{
@@ -293,7 +295,7 @@ public partial class FindDuplicatesView : UserControl, INotifyPropertyChanged
 		CommandBindings.Add(new CommandBinding(AppCommands.Refresh, (sender, args) => OnRefreshDrivers()));
 		CommandBindings.Add(new CommandBinding(AppCommands.ClearAll, (sender, args) => OnClearAll()));
 
-		CommandBindings.Add(new CommandBinding(AppCommands.Scan, (sender, args) => ScanAsync()));
+		CommandBindings.Add(new CommandBinding(AppCommands.Scan, (sender, args) => OnScanAsync()));
 
 		//CommandBindings.Add(new CommandBinding(AppCommands.Xxxxx, (sender, args) => OnXxxx(args)));
 		//CommandBindings.Add(new CommandBinding(AppCommands.Xxxxx, (sender, args) => OnXxxxx()));

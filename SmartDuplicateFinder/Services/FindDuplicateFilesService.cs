@@ -11,14 +11,15 @@ public class FindDuplicateFilesService
 {
 	public FindDuplicateFilesService()
 	{
-		StepProgress = new DesignTimeProgressManager();
-		SummaryProgress = new DesignTimeProgressManager();
+		StepUpdater = new DesignTimeProgressManager();
+		SummaryUpdater = new DesignTimeProgressManager();
 	}
 
-	public IProgress StepProgress { get; set; }
-	public IProgress SummaryProgress  { get; set; }
+	public IUpdateProgress StepUpdater { get; set; }
+	public IUpdateProgress SummaryUpdater  { get; set; }
 
 	public void ReadAllFiles(ImmutableArray<DirectoryInfo> rootFolders)
 	{
+		SummaryUpdater.Update(0, "Reading files", rootFolders.Length);
 	}
 }

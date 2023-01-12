@@ -26,7 +26,7 @@
 
     <Grid>
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="auto" MinWidth="130" MaxWidth="300"/>
+            <ColumnDefinition Width="200" MinWidth="130" MaxWidth="400"/>
             <ColumnDefinition Width="auto" />
             <ColumnDefinition Width="*" />
         </Grid.ColumnDefinitions>
@@ -46,7 +46,7 @@
                         Command="{x:Static smartDuplicateFinder:AppCommands.ClearAll}"
                         Content="{Binding Command.Text, RelativeSource={RelativeSource self} }" />
             </DockPanel>
-            <TreeView Padding="0,0,60,0"
+            <TreeView Padding="0,0,12,0"
                       ItemsSource="{Binding Drives}"
                       TreeViewItem.Expanded="TreeViewItem_OnExpanded">
                 <TreeView.Resources>

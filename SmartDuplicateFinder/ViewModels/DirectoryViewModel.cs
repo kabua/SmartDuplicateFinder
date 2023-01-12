@@ -1,10 +1,13 @@
 ﻿using PropertyChanged;
 using SmartDuplicateFinder.Utils;
+using System;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Threading;
+using System.Windows.Documents;
 
 namespace SmartDuplicateFinder.ViewModels;
 
@@ -19,12 +22,12 @@ public class DirectoryViewModel : INotifyPropertyChanged
 	internal DirectoryViewModel(DirectoryInfo directoryInfo, DirectoryViewModel parent)
 		: this()
 	{
-		_directoryInfo = directoryInfo!;
+		DirectoryInfo = directoryInfo;
 		_parent = parent;
 
-		DisplayName = _directoryInfo.Name;
-		Name = _directoryInfo.Name;
-		FullPath = _directoryInfo?.FullName ?? string.Empty;
+		DisplayName = DirectoryInfo.Name;
+		Name = DirectoryInfo.Name;
+		FullPath = DirectoryInfo.FullName;
 
 		if (HasSubFolders())
 		{
@@ -34,7 +37,7 @@ public class DirectoryViewModel : INotifyPropertyChanged
 
 	private DirectoryViewModel()
 	{
-		_directoryInfo = null!;
+		DirectoryInfo = null!;
 		DisplayName = "Loading...";
 		Name = "";
 		FullPath = "";
@@ -60,12 +63,16 @@ public class DirectoryViewModel : INotifyPropertyChanged
 	public bool IsExpanded { get; set; }
 
 	public ObservableCollection<DirectoryViewModel> SubFolders { get; private set; }
+	internal DirectoryInfo DirectoryInfo { get; private set; }
 
 	public void LoadSubFolders()
 	{
+		if (!(SubFolders.Count == 1 && SubFolders[0] == UnExpanded))
+			return;
+
 		SubFolders.Clear();
 
-		foreach (var directoryInfo in _directoryInfo.GetDirectories("*", s_options))
+		foreach (var directoryInfo in DirectoryInfo.GetDirectories("*", s_options))
 		{
 			SubFolders.Add(new DirectoryViewModel(directoryInfo, this));
 		}
@@ -106,10 +113,9 @@ public class DirectoryViewModel : INotifyPropertyChanged
 		}
 	}
 
-	private bool HasSubFolders() => _directoryInfo.EnumerateDirectories("*", s_options).Any();
+	private bool HasSubFolders() => DirectoryInfo.EnumerateDirectories("*", s_options).Any();
 
 	private static readonly EnumerationOptions s_options = new ();
 
-	private readonly DirectoryInfo _directoryInfo;
 	private readonly DirectoryViewModel? _parent;
 }
