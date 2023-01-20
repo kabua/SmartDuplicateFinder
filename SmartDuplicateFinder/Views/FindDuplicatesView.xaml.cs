@@ -72,7 +72,7 @@ public partial class FindDuplicatesView : UserControl, INotifyPropertyChanged
 
 		if (App.InDesignMode())
 		{
-			IsScanning = true;
+			//IsScanning = true;
 
 			var fullFileName = @"D:\Dev.old\Repos\GainsCapitalRateDownLoader\packages\HtmlAgilityPack.1.4.9.5\lib\portable-net45+netcore45+wp8+MonoAndroid+MonoTouch\\HtmlAgilityPack.dll";
 			fullFileName = fullFileName.ShortenPathname();
@@ -80,7 +80,7 @@ public partial class FindDuplicatesView : UserControl, INotifyPropertyChanged
 			((IUpdateProgress)StepProgress).Update(65, fullFileName, 100);
 			((IUpdateProgress)SummaryProgress).Update(double.NaN, "Step 1 of 3", 0);
 
-			ElapsedTime = new TimeSpan(5, 43, 21);
+			//ElapsedTime = new TimeSpan(5, 43, 21);
 		}
 	}
 
@@ -178,11 +178,16 @@ public partial class FindDuplicatesView : UserControl, INotifyPropertyChanged
 		var rootFolderNames = _imexService.Load(dialog.FileName);
 		foreach (var fullFolderName in rootFolderNames)
 		{
-			var folders = new Queue<string>(fullFolderName.Split(Path.DirectorySeparatorChar));
+			var folders = new Queue<string>(fullFolderName.Split(Path.DirectorySeparatorChar).Where(d => !string.IsNullOrWhiteSpace(d)));
 			var driveName = folders.Dequeue();
 
-			var folderVm =
-				Drives.FirstOrDefault(d => d.Name.Equals(driveName, StringComparison.CurrentCultureIgnoreCase)) as DirectoryViewModel;
+			var folderVm = Drives.FirstOrDefault(d => d.Name.Equals(driveName, StringComparison.CurrentCultureIgnoreCase)) as DirectoryViewModel;
+
+			if (folders.Count == 0 && folderVm != null)
+			{
+				folderVm.IsSelected = true;
+			}
+
 			while (folders.Count > 0 && folderVm != null)
 			{
 				folderVm.IsExpanded = true;

@@ -20,6 +20,21 @@ public class FindDuplicateFilesService
 
 	public void ReadAllFiles(ImmutableArray<DirectoryInfo> rootFolders)
 	{
+		StepUpdater.Update(double.NaN);
+
 		SummaryUpdater.Update(0, "Reading files", rootFolders.Length);
+
+		var options = new EnumerationOptions()
+		{
+			RecurseSubdirectories = true,
+			ReturnSpecialDirectories = true,
+		};
+
+		var current = 0;
+		foreach (var directoryInfo in rootFolders)
+		{
+			var files = directoryInfo.GetFileSystemInfos("*", options);
+			SummaryUpdater.Update(++current);
+		}
 	}
 }

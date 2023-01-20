@@ -124,9 +124,18 @@
                     <ProgressBar Grid.Row="2" 
                                  Margin="0, 60, 0, 0" 
                                  Height="10"
-                                 IsIndeterminate="{Binding StepProgress, Mode=OneWay, Converter={StaticResource _isIndeterminateConverter}}"
                                  Value="{Binding StepProgress.Current, Mode=OneWay}" 
-                                 Maximum="{Binding StepProgress.Total, Mode=OneWay}"  />
+                                 Maximum="{Binding StepProgress.Total, Mode=OneWay}" >
+                        <ProgressBar.IsIndeterminate>
+                            <MultiBinding Converter="{StaticResource _isIndeterminateConverter}">
+                                <MultiBinding.Bindings>
+                                    <Binding Path="StepProgress.Current" />
+                                    <Binding Path="StepProgress.Total" />
+                                </MultiBinding.Bindings>
+                            </MultiBinding>
+                        </ProgressBar.IsIndeterminate>
+
+                    </ProgressBar>
                     <!--<TextBlock Grid.Row="3" 
                                Text="{Binding StepProgress.Description, Mode=OneWay}"/>-->
                     <TextBlock Grid.Row="3">
@@ -143,9 +152,17 @@
                     <ProgressBar Grid.Row="4" 
                                  Margin="0, 18, 0, 0" 
                                  Height="10" 
-                                 IsIndeterminate="{Binding SummaryProgress, Mode=OneWay, Converter={StaticResource _isIndeterminateConverter}}"
                                  Value="{Binding SummaryProgress.Current, Mode=OneWay}" 
-                                 Maximum="{Binding SummaryProgress.Total, Mode=OneWay}"  />
+                                 Maximum="{Binding SummaryProgress.Total, Mode=OneWay}"  >
+                        <ProgressBar.IsIndeterminate>
+                            <MultiBinding Converter="{StaticResource _isIndeterminateConverter}">
+                                <MultiBinding.Bindings>
+                                    <Binding Path="SummaryProgress.Current" />
+                                    <Binding Path="SummaryProgress.Total" />
+                                </MultiBinding.Bindings>
+                            </MultiBinding>
+                        </ProgressBar.IsIndeterminate>
+                    </ProgressBar>
 
                     <TextBlock Grid.Row="5" Text="{Binding SummaryProgress.Description, Mode=OneWay}"/>
 

@@ -101,7 +101,7 @@ public class DirectoryViewModel : INotifyPropertyChanged
 		}
 	}
 
-	private void UpdateIcon()
+	protected virtual void UpdateIcon()
 	{
 		if (IsSelected == true)
 		{

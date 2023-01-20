@@ -40,6 +40,11 @@ public class DriveViewModel  : DirectoryViewModel
 		}
 	}
 
+	protected override void UpdateIcon()
+	{
+		// Do not update current icon.
+	}
+
 	public DriveInfo DriveInfo { get; private set; }
 
 	private static readonly string s_systemDrive;
