@@ -1,5 +1,6 @@
 using System;
 using System.Diagnostics;
+using System.IO;
 using System.Windows;
 
 [assembly: ThemeInfo(
@@ -10,3 +11,6 @@ using System.Windows;
                                               //(used if a resource is not found in the page,
                                               // app, or any theme specific resource dictionaries)
 )]
+
+[assembly:DebuggerDisplay("{Name}", Target = typeof(DirectoryInfo))]
+[assembly:DebuggerDisplay("{Name}", Target = typeof(FileInfo))]
