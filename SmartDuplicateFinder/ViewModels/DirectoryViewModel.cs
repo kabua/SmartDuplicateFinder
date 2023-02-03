@@ -63,6 +63,7 @@ public class DirectoryViewModel : INotifyPropertyChanged
 	public bool IsExpanded { get; set; }
 
 	public ObservableCollection<DirectoryViewModel> SubFolders { get; private set; }
+
 	internal DirectoryInfo DirectoryInfo { get; private set; }
 
 	public void LoadSubFolders()
@@ -101,6 +102,8 @@ public class DirectoryViewModel : INotifyPropertyChanged
 		}
 	}
 
+	private bool HasSubFolders() => DirectoryInfo.EnumerateDirectories("*", s_options).Any();
+
 	protected virtual void UpdateIcon()
 	{
 		if (IsSelected == true)
@@ -112,8 +115,6 @@ public class DirectoryViewModel : INotifyPropertyChanged
 			Icon = IsExpanded ? Icons.OpenFolder : Icons.CloseFolder;
 		}
 	}
-
-	private bool HasSubFolders() => DirectoryInfo.EnumerateDirectories("*", s_options).Any();
 
 	private static readonly EnumerationOptions s_options = new ();
 

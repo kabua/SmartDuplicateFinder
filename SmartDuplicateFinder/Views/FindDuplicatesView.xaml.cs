@@ -59,6 +59,7 @@ public partial class FindDuplicatesView : UserControl, INotifyPropertyChanged
 
 		_duplicateFilesService.StepUpdater = (IUpdateProgress) StepProgress;
 		_duplicateFilesService.SummaryUpdater = (IUpdateProgress) SummaryProgress;
+
 		_stopwatch = new Stopwatch();
 		_timer = new DispatcherTimer(DispatcherPriority.Send, Dispatcher.CurrentDispatcher)
 		{
@@ -81,6 +82,20 @@ public partial class FindDuplicatesView : UserControl, INotifyPropertyChanged
 			((IUpdateProgress)SummaryProgress).Update(double.NaN, "Step 1 of 3", 0);
 
 			//ElapsedTime = new TimeSpan(5, 43, 21);
+		}
+		else
+		{
+			Task.Run(async () =>
+			{
+				const string FullFileName = @"C:\Test\Read Folders - Test 1.sd";
+				if (File.Exists(FullFileName))
+				{
+					await Task.Delay(250);
+
+					// Must run on UI thread.
+					Dispatcher.Invoke(() => LoadSelection(FullFileName));
+				}
+			});
 		}
 	}
 
@@ -128,27 +143,6 @@ public partial class FindDuplicatesView : UserControl, INotifyPropertyChanged
 		}
 	}
 
-#pragma warning disable IDE0051 // Called by generated code.
-	// ReSharper disable once UnusedMember.Local
-	private void OnIsScanningChanged()
-#pragma warning restore IDE0051
-	{
-		if (IsScanning)
-		{
-			ScanVerb = Constants.ScanningVerbName;
-			_stopwatch.Reset();
-			_stopwatch.Restart();
-			_timer.Start();
-		}
-		else
-		{
-			ScanVerb = Constants.ScanVerbName;
-			_timer.Stop();
-			_stopwatch.Stop();
-			_stopwatch.Reset();
-		}
-	}
-
 	private void RefreshDrivers()
 	{
 		Drives.Clear();
@@ -173,9 +167,12 @@ public partial class FindDuplicatesView : UserControl, INotifyPropertyChanged
 		}
 	}
 
-	private void LoadSelection(VistaOpenFileDialog dialog)
+	private void LoadSelection(string fileName)
 	{
-		var rootFolderNames = _imexService.Load(dialog.FileName);
+		var rootFolderNames = _imexService.Load(fileName);
+
+		RefreshDrivers();
+
 		foreach (var fullFolderName in rootFolderNames)
 		{
 			var folders = new Queue<string>(fullFolderName.Split(Path.DirectorySeparatorChar).Where(d => !string.IsNullOrWhiteSpace(d)));
@@ -206,6 +203,28 @@ public partial class FindDuplicatesView : UserControl, INotifyPropertyChanged
 
 
 	private void TimerOnTick(object? sender, EventArgs e) => ElapsedTime = _stopwatch.Elapsed;
+
+#pragma warning disable IDE0051 // Called by generated code.
+	// ReSharper disable once UnusedMember.Local
+	private void OnIsScanningChanged()
+#pragma warning restore IDE0051
+	{
+		if (IsScanning)
+		{
+			ScanVerb = Constants.ScanningVerbName;
+			_stopwatch.Reset();
+			_stopwatch.Restart();
+			_timer.Start();
+		}
+		else
+		{
+			ScanVerb = Constants.ScanVerbName;
+			_timer.Stop();
+			_stopwatch.Stop();
+			_stopwatch.Reset();
+		}
+	}
+
 
 	private void OnSaveSelection()
 	{
@@ -243,7 +262,7 @@ public partial class FindDuplicatesView : UserControl, INotifyPropertyChanged
 		if (dialog.ShowDialog(Window.GetWindow(this)) != true)
 			return;
 
-		LoadSelection(dialog);
+		LoadSelection(dialog.FileName);
 	}
 
 
