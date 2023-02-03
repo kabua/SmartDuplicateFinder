@@ -297,6 +297,9 @@ public partial class FindDuplicatesView : UserControl, INotifyPropertyChanged
 
 	private void AddCommandBindings()
 	{
+		App.Current.MainWindow!.CommandBindings.Add(new CommandBinding(AppCommands.Save, (sender, args) => OnSaveSelection()));
+		App.Current.MainWindow!.CommandBindings.Add(new CommandBinding(AppCommands.Load, (sender, args) => OnLoadSelection()));
+
 		CommandBindings.Add(new CommandBinding(AppCommands.Refresh, (sender, args) => OnRefreshDrivers()));
 		CommandBindings.Add(new CommandBinding(AppCommands.ClearAll, (sender, args) => OnClearAll()));
 
