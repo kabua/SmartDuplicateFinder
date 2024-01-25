@@ -1,4 +1,5 @@
-﻿using System.ComponentModel;
+﻿using System;
+using System.ComponentModel;
 using System.Windows.Threading;
 
 namespace SmartDuplicateFinder.Services;
@@ -7,9 +8,13 @@ public class UpdateProgressManager : IProgress, IUpdateProgress, INotifyProperty
 {
 	public event PropertyChangedEventHandler? PropertyChanged;
 
-	public UpdateProgressManager(Dispatcher dispatcher)
+	public UpdateProgressManager(Dispatcher dispatcher, TimeSpan? updateInterval = null)
 	{
-		_dispatcher = dispatcher;
+		_timer = new DispatcherTimer(DispatcherPriority.Send, dispatcher)
+		{
+			Interval = updateInterval ?? TimeSpan.FromMilliseconds(10),
+		};
+		_timer.Tick += TimerOnTick;
 
 		Description = "";
 		Current = 0;
@@ -22,26 +27,29 @@ public class UpdateProgressManager : IProgress, IUpdateProgress, INotifyProperty
 
 	public void Update(double current, string? description = null, double? total = null)
 	{
-		static void DoUpdate(UpdateProgressManager self, double current, string? description = null, double? total = null)
-		{
-			self.Current = current;
+		_current = current;
+		_description = description;
+		_total = total;
 
-			if (description != null)
-				self.Description = description;
-
-			if (total != null)
-				self.Total = total.Value;
-		}
-
-		if (_dispatcher.CheckAccess())
-		{
-			DoUpdate(this, current, description, total);
-		}
-		else
-		{
-			_dispatcher.Invoke(() => DoUpdate(this, current, description, total));
-		}
+		_timer.Start();
 	}
 
-	private readonly Dispatcher _dispatcher;
+	private void TimerOnTick(object? sender, EventArgs e)
+	{
+		_timer.Stop();
+
+		Current = _current;
+
+		if (_description != null)
+			Description = _description;
+
+		if (_total != null)
+			Total = _total.Value;
+	}
+
+	private readonly DispatcherTimer _timer;
+
+	private double _current;
+	private string? _description;
+	private double? _total;
 }

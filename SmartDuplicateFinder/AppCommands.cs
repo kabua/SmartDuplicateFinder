@@ -9,6 +9,9 @@ public static class AppCommands
 
     // Menu Item commands
     //
+    public static readonly RoutedUICommand Save = new("_Save...", "Save", OwnerType);
+    public static readonly RoutedUICommand Load = new("_Load...", "Load", OwnerType);
+
     public static readonly RoutedUICommand Exit = new("_Exit", "Exit", OwnerType, new InputGestureCollection(new[] { new KeyGesture(Key.F4, ModifierKeys.Alt) }));
     public static readonly RoutedUICommand AboutHelp = new ("About...", "AboutHelp", OwnerType);
 

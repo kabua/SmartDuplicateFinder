@@ -14,6 +14,9 @@
     <DockPanel>
         <Menu DockPanel.Dock="Top">
             <MenuItem Header="_File">
+                <MenuItem Command="{x:Static local:AppCommands.Save}" />
+                <MenuItem Command="{x:Static local:AppCommands.Load}" />
+                <Separator/>
                 <MenuItem Command="{x:Static local:AppCommands.Exit}" />
             </MenuItem>
 
